@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sukoon — Cognitive Support & Caregiver Platform</title>
+<link rel="stylesheet" href="/app/css/base.css">
+<style>
+  .home-hero { max-width: 900px; margin: 48px auto 24px; text-align: center; padding: 0 20px; }
+  .home-hero h1 { font-size: 2.1rem; color: var(--sukoon-teal-800, var(--sukoon-teal-700)); margin-bottom: 8px; }
+  .home-hero p { color: var(--sukoon-ink-500); font-size: 1.02rem; line-height: 1.5; max-width: 640px; margin: 0 auto; }
+  .home-badges { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div class="sk-login-shell">
+    <div style="width:100%; max-width: 460px;">
+      <div class="home-hero" style="margin-top:0;">
+        <div style="font-size:2.4rem;">🧘</div>
+        <h1>Sukoon</h1>
+        <p>A cognitive support, memory-assistance and caregiver-monitoring platform for elderly patients in the North Eastern Region — built for SIH 2026 (PS 26003).</p>
+        <div class="home-badges">
+          <span class="sk-badge sk-badge-info">Not a diagnostic tool</span>
+          <span class="sk-badge sk-badge-neutral">Assamese + English</span>
+          <span class="sk-badge sk-badge-good">Offline-first</span>
+        </div>
+      </div>
+
+      <div class="sk-login-card">
+        <div class="sk-login-logo">🔐</div>
+        <div class="sk-login-title">Sign in</div>
+        <div class="sk-login-subtitle">Patient, caregiver and doctor accounts all sign in here</div>
+
+        <form id="loginForm">
+          <div class="sk-field">
+            <label for="email">Email</label>
+            <input id="email" type="email" required autocomplete="username" placeholder="you@example.com">
+          </div>
+          <div class="sk-field">
+            <label for="password">Password</label>
+            <input id="password" type="password" required autocomplete="current-password" placeholder="••••••••">
+          </div>
+          <button type="submit" class="sk-btn sk-btn-primary" style="width:100%; justify-content:center; padding:12px;">Sign in</button>
+          <div class="sk-error-text" id="errorText"></div>
+        </form>
+
+        <div class="sk-demo-accounts">
+          <p>Judge / demo mode — one tap to explore each role</p>
+          <div class="sk-demo-btn-row">
+            <button class="sk-btn sk-btn-secondary" data-demo="patient@sukoon.demo:Patient@123">👵 Patient</button>
+            <button class="sk-btn sk-btn-secondary" data-demo="caregiver@sukoon.demo:Caregiver@123">🧑‍🤝‍🧑 Caregiver</button>
+            <button class="sk-btn sk-btn-secondary" data-demo="doctor@sukoon.demo:Doctor@123">🩺 Doctor</button>
+            <button class="sk-btn sk-btn-secondary" data-demo="family@sukoon.demo:Family@123">🏡 Family</button>
+          </div>
+        </div>
+      </div>
+
+      <p style="text-align:center; margin-top:16px; font-size:0.8rem;">
+        <a href="/app/shared/privacy.html" style="color:var(--sukoon-ink-500); text-decoration:underline;">Privacy &amp; consent information</a>
+      </p>
+    </div>
+  </div>
+
+<script src="/app/js/api.js"></script>
+<script>
+  const form = document.getElementById("loginForm");
+  const errorText = document.getElementById("errorText");
+
+  function roleHome(role) {
+    if (role === "patient") return "/app/patient/";
+    if (role === "caregiver") return "/app/caregiver/";
+    if (role === "doctor") return "/app/doctor/";
+    if (role === "family") return "/app/family/";
+    return "/";
+  }
+
+  async function doLogin(email, password) {
+    errorText.textContent = "";
+    try {
+      const res = await SukoonAPI.post("/api/auth/login", { email, password });
+      SukoonAPI.setSession(res.access_token, res.user, res.profile_id);
+      location.href = roleHome(res.user.role);
+    } catch (e) {
+      errorText.textContent = e.message || "Login failed. Please check your email and password.";
+    }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    doLogin(document.getElementById("email").value.trim(), document.getElementById("password").value);
+  });
+
+  document.querySelectorAll("[data-demo]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const [email, password] = btn.getAttribute("data-demo").split(":");
+      document.getElementById("email").value = email;
+      document.getElementById("password").value = password;
+      doLogin(email, password);
+    });
+  });
+
+  // If already logged in, skip straight to the right app.
+  (function redirectIfLoggedIn() {
+    const user = SukoonAPI.getUser();
+    if (user && SukoonAPI.getToken()) {
+      location.href = roleHome(user.role);
+    }
+  })();
+</script>
+</body>
+</html>

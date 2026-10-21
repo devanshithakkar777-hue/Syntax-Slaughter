@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sukoon — Family Dashboard</title>
+<link rel="stylesheet" href="/app/css/base.css">
+<link rel="stylesheet" href="/app/js/vendor/leaflet/leaflet.css">
+<script src="/app/js/vendor/chart.umd.js"></script>
+<script src="/app/js/vendor/leaflet/leaflet.js"></script>
+<style>
+  .fm-layout { display: flex; min-height: calc(100vh - 60px); }
+  .fm-sidebar { width: 260px; background: #fff; border-right: 1px solid var(--sukoon-line); padding: 16px; flex-shrink: 0; }
+  .fm-sidebar h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--sukoon-ink-500); margin: 4px 0 10px; }
+  .fm-patient-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; cursor: pointer; margin-bottom: 6px; border: 1px solid transparent; }
+  .fm-patient-item.active { background: var(--sukoon-teal-50); border-color: var(--sukoon-teal-100); }
+  .fm-patient-avatar { width: 40px; height: 40px; border-radius: 50%; background: #8e5fc9; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .fm-patient-name { font-weight: 700; font-size: 0.92rem; }
+  .fm-patient-sub { font-size: 0.76rem; color: var(--sukoon-ink-500); }
+  .fm-main { flex: 1; min-width: 0; }
+  .fm-content { padding: 24px; max-width: 1180px; }
+  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+  .stat-chip { background: var(--sukoon-teal-50); border: 1px solid var(--sukoon-teal-100); border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; color: var(--sukoon-teal-900); }
+  .chart-wrap { height: 240px; }
+  .fm-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 10px; }
+  .sk-checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; padding: 4px 0; }
+  .fm-people-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--sukoon-line); border-radius: 10px; margin-bottom: 8px; }
+  .fm-people-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .dr-file-card { background: #fffdf7; border: 1px solid #e8dfc8; border-left: 4px solid var(--sukoon-teal-800, #1f9d8a); border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; font-family: Georgia, 'Times New Roman', serif; }
+  .dr-file-card .dr-file-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed #d8cdae; padding-bottom: 8px; margin-bottom: 10px; }
+  .dr-file-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8a7c56; font-family: var(--sukoon-font, inherit); }
+  .dr-file-row { display: grid; grid-template-columns: 160px 1fr; gap: 4px 12px; padding: 3px 0; font-size: 0.9rem; }
+  .dr-file-row dt { color: #6b6255; }
+  .dr-file-row dd { margin: 0; color: #2b2620; }
+</style>
+</head>
+<body>
+  <div class="sk-topbar" style="background:#3d2f5c; color:#fff; border-bottom:none;">
+    <div class="sk-brand" style="color:#fff;"><span class="sk-logo">🧘</span> Sukoon <span class="sk-role-pill" style="background:#59477e; color:#e6dcf7;">Family</span></div>
+    <div class="sk-topbar-actions">
+      <span id="fmUserName" style="font-size:0.88rem; color:#e6dcf7;"></span>
+      <button class="sk-btn sk-btn-ghost" style="background:#4c3d70; color:#fff; border-color:#6a5793;" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <div class="fm-layout">
+    <div class="fm-sidebar">
+      <h3>Family Members Of</h3>
+      <div id="patientList"><div class="sk-loading">…</div></div>
+      <p style="font-size:0.75rem; color:var(--sukoon-ink-500); margin-top:16px; line-height:1.5;">The family dashboard brings together the patient's, caregiver's and doctor's data, and is where doctor access is granted or revoked.</p>
+    </div>
+
+    <div class="fm-main">
+      <div class="sk-tabbar" id="tabbar">
+        <div class="sk-tab active" data-tab="overview">Overview</div>
+        <div class="sk-tab" data-tab="agents">🤖 AI Care Agents</div>
+        <div class="sk-tab" data-tab="updates">Updates</div>
+        <div class="sk-tab" data-tab="doctors">Doctor Authorization</div>
+        <div class="sk-tab" data-tab="records">Medical Records</div>
+        <div class="sk-tab" data-tab="appointments">Appointments</div>
+        <div class="sk-tab" data-tab="contacts">Family &amp; Contacts</div>
+        <div class="sk-tab" data-tab="safety">Location &amp; Wearable</div>
+        <div class="sk-tab" data-tab="alerts">Alerts</div>
+      </div>
+      <div class="fm-content" id="tabContent"><div class="sk-loading">Loading dashboard…</div></div>
+    </div>
+  </div>
+
+<script src="/app/js/api.js"></script>
+<script src="/app/js/i18n.js"></script>
+<script src="/app/js/util.js"></script>
+<script src="/app/js/voice.js"></script>
+<script src="/app/js/agentic-ui.js"></script>
+<script src="/app/js/family.js"></script>
+</body>
+</html>

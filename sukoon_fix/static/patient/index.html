@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sukoon — Patient</title>
+<link rel="stylesheet" href="/app/css/base.css">
+<link rel="stylesheet" href="/app/css/patient.css">
+</head>
+<body class="patient-app">
+  <div class="sk-offline-banner" id="offlineBanner"></div>
+
+  <div class="p-topbar">
+    <div>
+      <div class="p-greeting" id="greeting">Good Morning</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="p-lang-switch">
+        <button class="p-lang-btn" data-lang="en">EN</button>
+        <button class="p-lang-btn" data-lang="as">অসমীয়া</button>
+      </div>
+      <button class="p-icon-btn" id="familyNavBtn" title="My Family">👨‍👩‍👧</button>
+      <button class="p-icon-btn" id="logoutBtn" title="Log out">🚪</button>
+    </div>
+  </div>
+
+  <!-- HOME VIEW -->
+  <div id="homeView">
+    <div class="p-grid" id="homeGrid">
+      <div class="sk-loading">Loading your day…</div>
+    </div>
+  </div>
+
+  <!-- ROUTINE VIEW -->
+  <div id="routineView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title" data-i18n="today_routine">Today's Routine</div>
+    <div class="p-grid" id="routineList"></div>
+  </div>
+
+  <!-- REMINDERS VIEW -->
+  <div id="remindersView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title">Reminders</div>
+    <div class="p-grid" id="remindersList"></div>
+  </div>
+
+  <!-- HYDRATION VIEW -->
+  <div id="hydrationView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title" data-i18n="hydration">Hydration</div>
+    <div class="p-hydration-summary" id="hydrationSummary"></div>
+    <div class="p-hydration-grid" id="hydrationGrid"></div>
+  </div>
+
+  <!-- MEALS VIEW -->
+  <div id="mealsView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title">Meals</div>
+    <div class="p-hydration-grid" id="mealsGrid"></div>
+  </div>
+
+  <!-- MEDICINE CHECKLIST VIEW -->
+  <div id="medicineView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title" data-i18n="next_medicine">Medicine</div>
+    <div class="sk-disclaimer" style="margin:0 20px 16px;">A medicine only shows as fully taken once both you and your caregiver confirm it.</div>
+    <div class="p-grid" id="medicineList"></div>
+  </div>
+
+  <!-- JOURNAL VIEW -->
+  <div id="journalView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title">My Journal</div>
+    <div class="p-journal-wrap">
+      <div class="p-journal-card">
+        <div class="p-journal-label">Today — write or speak about your day</div>
+        <textarea id="journalTextToday" class="p-journal-textarea" placeholder="What happened today?"></textarea>
+        <div class="p-journal-actions">
+          <button class="sk-btn sk-btn-ghost" id="journalMicBtn" type="button">🎙️ Speak</button>
+          <button class="sk-btn" id="journalSaveBtn" type="button">Save entry</button>
+        </div>
+      </div>
+      <div class="p-journal-card" id="journalYesterdayCard">
+        <div class="p-journal-label">Yesterday — do you remember?</div>
+        <div id="journalYesterdayText" class="p-journal-readback"></div>
+        <div class="p-journal-actions" id="journalYesterdayActions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPANION CHAT VIEW -->
+  <div id="chatView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title">Companion Chat</div>
+    <div class="sk-disclaimer" style="margin:0 20px 12px;">This is a simple guided-response companion, not a real person or AI doctor. In an emergency, use the red Help button.</div>
+    <div class="p-chat-wrap">
+      <div class="p-chat-messages" id="chatMessages"></div>
+      <div class="p-chat-input-row">
+        <input type="text" id="chatInput" class="p-chat-input" placeholder="Type how you're feeling…">
+        <button class="sk-btn" id="chatSendBtn" type="button">Send</button>
+        <button class="sk-btn sk-btn-ghost" id="chatMicBtn" type="button">🎙️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPOINTMENTS VIEW -->
+  <div id="apptView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title" data-i18n="doctor_appointment">Doctor Appointment</div>
+    <div class="p-grid" id="apptList"></div>
+    <div class="p-section-title sk-hidden" id="apptNotesTitle"></div>
+    <div class="p-grid" id="apptNotesList"></div>
+  </div>
+
+  <!-- MOOD VIEW -->
+  <div id="moodView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title" data-i18n="how_are_you_feeling">How are you feeling today?</div>
+    <div class="p-mood-row">
+      <button class="p-mood-btn" data-mood="good">😊<span class="label" data-i18n="good">Good</span></button>
+      <button class="p-mood-btn" data-mood="okay">🙂<span class="label" data-i18n="okay">Okay</span></button>
+      <button class="p-mood-btn" data-mood="unsure">😐<span class="label" data-i18n="unsure">Not sure</span></button>
+      <button class="p-mood-btn" data-mood="sad">🙁<span class="label" data-i18n="sad">Sad</span></button>
+    </div>
+    <div class="sk-disclaimer" style="margin:20px;">This is a simple daily well-being check, not a psychiatric assessment.</div>
+  </div>
+
+  <!-- GAME PICKER VIEW -->
+  <div id="gamesView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title">Cognitive Activities</div>
+    <div class="p-grid" id="gamesList"></div>
+  </div>
+
+  <!-- GAME PLAY VIEW -->
+  <div id="playView" class="sk-hidden p-game-shell"></div>
+
+  <!-- HELP VIEW -->
+  <div id="helpView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-grid">
+      <div class="p-card help" style="grid-column: 1 / -1;">
+        <div class="p-card-icon">🆘</div>
+        <div class="p-card-title">Need help right now?</div>
+        <p style="font-size:1.1rem;">Pressing this button will immediately notify your caregiver.</p>
+        <button id="confirmHelpBtn">Notify my caregiver</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAMILY VIEW (family tree + call for comfort) -->
+  <div id="familyView" class="sk-hidden">
+    <button class="p-back-btn" data-back="home">← Back</button>
+    <div class="p-section-title" data-i18n="my_family">My Family</div>
+    <div style="padding:0 20px; color:var(--sukoon-ink-500); font-size:1rem;">Tap a photo to call. Feeling upset? They will be told right away.</div>
+    <div class="p-grid" id="familyList"></div>
+  </div>
+
+  <button class="p-help-fab" id="helpFab" title="Help">🆘</button>
+  <button class="p-voice-fab" id="voiceFab" title="Voice assistant">🎙️</button>
+  <div class="p-voice-panel sk-hidden" id="voicePanel"></div>
+
+<script src="/app/js/api.js"></script>
+<script src="/app/js/i18n.js"></script>
+<script src="/app/js/offline.js"></script>
+<script src="/app/js/util.js"></script>
+<script src="/app/js/voice.js"></script>
+<script src="/app/js/games/shared_objects.js"></script>
+<script src="/app/js/games/memory_matching.js"></script>
+<script src="/app/js/games/pattern_recognition.js"></script>
+<script src="/app/js/games/object_recognition.js"></script>
+<script src="/app/js/games/routine_recall.js"></script>
+<script src="/app/js/patient.js"></script>
+</body>
+</html>

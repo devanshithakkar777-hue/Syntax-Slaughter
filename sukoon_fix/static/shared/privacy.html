@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sukoon — Privacy &amp; Consent</title>
+<link rel="stylesheet" href="/app/css/base.css">
+<style>
+  .priv-wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 60px; }
+  .priv-wrap h1 { color: var(--sukoon-teal-700); }
+  .priv-section { margin-bottom: 22px; }
+  .priv-section h2 { font-size: 1.05rem; color: var(--sukoon-teal-900); margin-bottom: 6px; }
+  .priv-section p { color: var(--sukoon-ink-700); line-height: 1.6; margin: 0; }
+  .priv-list { margin: 10px 0 0; padding-left: 20px; color: var(--sukoon-ink-700); line-height: 1.7; }
+</style>
+</head>
+<body>
+  <div class="sk-topbar">
+    <a href="/" class="sk-brand"><span class="sk-logo">🧘</span> Sukoon</a>
+    <a href="/" class="sk-btn sk-btn-ghost">← Back to sign in</a>
+  </div>
+  <div class="priv-wrap">
+    <h1>Privacy &amp; Consent</h1>
+    <div class="sk-disclaimer" style="margin-bottom:24px;">
+      Sukoon is a cognitive support and memory assistance platform. It does not diagnose or treat dementia.
+      AI insights are intended to support caregivers and healthcare professionals and are not medical diagnoses.
+    </div>
+
+    <div id="content" class="sk-loading">Loading…</div>
+  </div>
+
+<script src="/app/js/api.js"></script>
+<script>
+  fetch("/api/consent/privacy").then(r => r.json()).then(d => {
+    const el = document.getElementById("content");
+    el.className = "";
+    el.innerHTML = `
+      <div class="priv-section"><h2>What is collected</h2><p>${d.what_is_collected}</p></div>
+      <div class="priv-section"><h2>Why it is collected</h2><p>${d.why}</p></div>
+      <div class="priv-section"><h2>Who can access it</h2><p>${d.who_can_access}</p></div>
+      <div class="priv-section"><h2>How to revoke access</h2><p>${d.how_to_revoke}</p></div>
+      <div class="priv-section"><h2>Important disclaimers</h2><ul class="priv-list">${d.disclaimers.map(x => `<li>${x}</li>`).join("")}</ul></div>
+    `;
+  }).catch(() => { document.getElementById("content").textContent = "Could not load privacy information right now."; });
+</script>
+</body>
+</html>

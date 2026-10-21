@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sukoon — Doctor Dashboard</title>
+<link rel="stylesheet" href="/app/css/base.css">
+<link rel="stylesheet" href="/app/js/vendor/leaflet/leaflet.css">
+<script src="/app/js/vendor/chart.umd.js"></script>
+<script src="/app/js/vendor/leaflet/leaflet.js"></script>
+<style>
+  body { background: #f4f6f7; }
+  .dr-layout { display: flex; min-height: calc(100vh - 60px); }
+  .dr-sidebar { width: 260px; background: #fff; border-right: 1px solid var(--sukoon-line); padding: 16px; flex-shrink: 0; }
+  .dr-patient-item { padding: 12px; border-radius: 10px; cursor: pointer; margin-bottom: 6px; border: 1px solid var(--sukoon-line); }
+  .dr-patient-item.active { background: #eef2f5; border-color: var(--sukoon-ink-300); }
+  .dr-main { flex: 1; min-width: 0; padding: 24px; max-width: 980px; }
+  .dr-section-title { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--sukoon-ink-500); margin: 22px 0 8px; }
+  .chart-wrap { height: 220px; }
+  .dr-tabs { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid var(--sukoon-line); }
+  .dr-tab { padding: 10px 16px; cursor: pointer; font-size: 0.88rem; font-weight: 600; color: var(--sukoon-ink-500); border-bottom: 2px solid transparent; }
+  .dr-tab.active { color: var(--sukoon-teal-800, #1f9d8a); border-bottom-color: var(--sukoon-teal-800, #1f9d8a); }
+  .dr-file-card { background: #fffdf7; border: 1px solid #e8dfc8; border-left: 4px solid var(--sukoon-teal-800, #1f9d8a); border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; font-family: Georgia, 'Times New Roman', serif; }
+  .dr-file-card .dr-file-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed #d8cdae; padding-bottom: 8px; margin-bottom: 10px; }
+  .dr-file-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8a7c56; font-family: var(--sukoon-font, inherit); }
+  .dr-file-row { display: grid; grid-template-columns: 160px 1fr; gap: 4px 12px; padding: 3px 0; font-size: 0.9rem; }
+  .dr-file-row dt { color: #6b6255; }
+  .dr-file-row dd { margin: 0; color: #2b2620; }
+</style>
+</head>
+<body>
+  <div class="sk-topbar" style="background:#232d2b; color:#fff; border-bottom:none;">
+    <div class="sk-brand" style="color:#fff;"><span class="sk-logo">🧘</span> Sukoon <span class="sk-role-pill" style="background:#3a4744; color:#cfe7e2;">Doctor</span></div>
+    <div class="sk-topbar-actions">
+      <span id="drUserName" style="font-size:0.88rem; color:#d8dedb;"></span>
+      <button class="sk-btn sk-btn-ghost" style="background:#33403d; color:#fff; border-color:#465350;" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <div class="dr-layout">
+    <div class="dr-sidebar">
+      <h3 style="font-size:0.78rem; text-transform:uppercase; color:var(--sukoon-ink-500); margin-top:4px;">Authorized Patients</h3>
+      <div id="patientList"><div class="sk-loading">…</div></div>
+      <p style="font-size:0.75rem; color:var(--sukoon-ink-500); margin-top:16px; line-height:1.5;">Only patients whose caregiver has explicitly authorized your access appear here.</p>
+    </div>
+    <div class="dr-main">
+      <div class="dr-tabs" id="drTabs" style="display:none;">
+        <div class="dr-tab active" data-tab="overview">Overview</div>
+        <div class="dr-tab" data-tab="agents">🤖 AI Care Agents</div>
+        <div class="dr-tab" data-tab="appointments">Appointments</div>
+        <div class="dr-tab" data-tab="records">Medical Records</div>
+      </div>
+      <div id="drContent"><div class="sk-loading">Select a patient</div></div>
+    </div>
+  </div>
+
+<script src="/app/js/api.js"></script>
+<script src="/app/js/util.js"></script>
+<script src="/app/js/voice.js"></script>
+<script src="/app/js/agentic-ui.js"></script>
+<script src="/app/js/doctor.js"></script>
+</body>
+</html>

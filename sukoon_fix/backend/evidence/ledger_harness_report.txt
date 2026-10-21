@@ -1,0 +1,147 @@
+========================================================================================
+SUKOON — Offline Care Ledger + Safety Reconciliation Engine — Test Harness
+Run started: 2026-10-21T18:30:30.530803Z
+========================================================================================
+
+Synthetic patient_id = d5c98bca-8fe2-4e13-bfc7-e92200a70f48  (clearly synthetic account — no real patient data used)
+Logged in as both synthetic accounts via the real /api/auth/login endpoint.
+
+>>> POST /api/ledger/sync (chunk 1 — initial upload (caregiver tablet)) -> HTTP 200
+    status=partial received=11 accepted=7 duplicate=0 rejected=4 conflict_or_review=0
+      line  1  accepted          evt-rem-1                     delivery state advanced to scheduled
+      line  2  accepted          evt-rem-2                     delivery state advanced to notification_attempted
+      line  3  rejected          -                             malformed JSON on line 3: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+      line  4  rejected          -                             envelope validation failed: Field required (no event_id -- could not be recorded in the ledger)
+      line  5  accepted          evt-rem-3                     delivery state advanced to provider_accepted
+      line  6  rejected          evt-bad-type                  unknown event_type 'launch_nuclear_missiles' — handled safely as rejected, not guessed
+      line  7  rejected          evt-bad-schema                unsupported schema_version 99 for 'mood_log' (server supports 1)
+      line  8  accepted          evt-oo-7                      caregiver action 'checked_in_again' logged
+      line  9  accepted          evt-gap-10                    caregiver action 'gap_marker' logged
+      line 10  accepted          evt-consent-1                 consent for 'location' granted; version 0 -> 1
+      line 11  accepted          evt-routine-cg                routine created
+
+>>> POST /api/ledger/sync (chunk 1 — initial upload (patient phone)) -> HTTP 200
+    status=partial received=1 accepted=0 duplicate=0 rejected=1 conflict_or_review=0
+      line  1  rejected          evt-bad-payload               payload validation failed for 'cognitive_game_result': Value error, correct_attempts cannot exceed attempts
+
+>>> POST /api/ledger/sync (chunk 2 — resumed after interruption (caregiver tablet)) -> HTTP 200
+    status=complete received=10 accepted=7 duplicate=3 rejected=0 conflict_or_review=0
+      line  1  duplicate         evt-rem-1                     delivery state advanced to scheduled
+      line  2  duplicate         evt-routine-cg                routine created
+      line  3  accepted          evt-oo-6                      caregiver action 'checked_in' logged
+      line  4  accepted          evt-seq-9                     caregiver action 'post_gap_check_in' logged
+      line  5  accepted          evt-esc-1                     caregiver escalation recorded (first for this occurrence)
+      line  6  duplicate         evt-esc-2                     already escalated — suppressing duplicate escalation to prevent an alert storm
+      line  7  accepted          evt-consent-2                 consent for 'location' revoked; version 1 -> 2
+      line  8  accepted          evt-consent-fresh             consent for 'location' granted; version 2 -> 3
+      line  9  accepted          evt-geo-1                     geofence status set to 'observed'
+      line 10  accepted          evt-geo-2                     geofence status set to 'unknown' — uncertainty recorded explicitly, not treated as safe
+
+>>> POST /api/ledger/sync (chunk 2 — resumed after interruption (patient phone)) -> HTTP 200
+    status=partial received=3 accepted=1 duplicate=0 rejected=1 conflict_or_review=1
+      line  1  accepted          evt-ack-1                     medicine/reminder explicitly acknowledged by the user — never inferred from a notification alone
+      line  2  rejected          evt-consent-stale             stale consent_version 1 < current 3 for 'location' — an offline grant cannot restore access over a newer decision (possibly a revocation)
+      line  3  conflict_review   evt-routine-pt                concurrent edit: actor 8f236a51-b98b-4c40-9cac-b650b30c1e2f overwrote a change by bd0fbb9f-ecc9-40db-91eb-4181ac6e5de3 made 1s earlier — applied by server order, flagged for review
+
+----------------------------------------------------------------------------------------
+ASSERTIONS — per-record outcomes
+----------------------------------------------------------------------------------------
+  [PASS] Well-formed reminder_provider_accepted accepted — got accepted: delivery state advanced to provider_accepted
+  [PASS] Non-JSON line rejected (not fatal to the batch)
+  [PASS] Line missing event_id rejected safely
+  [PASS] Unknown event_type rejected (handled safely, not guessed) — got rejected: unknown event_type 'launch_nuclear_missiles' — handled safely as rejected, not guessed
+  [PASS] Unsupported schema_version rejected — got rejected: unsupported schema_version 99 for 'mood_log' (server supports 1)
+  [PASS] Payload failing validation (correct_attempts>attempts) rejected — got rejected: payload validation failed for 'cognitive_game_result': Value error, correct_attempts cannot exceed attempts
+  [PASS] Resent event_id comes back as duplicate, not reprocessed — got duplicate: delivery state advanced to scheduled
+  [PASS] Second (duplicate) escalation suppressed, not a new alert — got duplicate: already escalated — suppressing duplicate escalation to prevent an alert storm
+  [PASS] Explicit acknowledgement accepted — got accepted: medicine/reminder explicitly acknowledged by the user — never inferred from a notification alone
+  [PASS] Stale consent_version cannot restore revoked access — got rejected: stale consent_version 1 < current 3 for 'location' — an offline grant cannot restore access over a newer decision (possibly a revocation)
+  [PASS] Up-to-date consent grant accepted — got accepted: consent for 'location' granted; version 2 -> 3
+  [PASS] Concurrent routine edit flagged for review (still applied deterministically) — got conflict_review: concurrent edit: actor 8f236a51-b98b-4c40-9cac-b650b30c1e2f overwrote a change by bd0fbb9f-ecc9-40db-91eb-4181ac6e5de3 made 1s earlier — applied by server order, flagged for review
+
+----------------------------------------------------------------------------------------
+ASSERTIONS — resumable-sync checkpoints & gap detection
+----------------------------------------------------------------------------------------
+  checkpoint(caregiver-tablet-1) = {'device_id': 'caregiver-tablet-1', 'max_device_sequence_seen': 15, 'contiguous_up_to': 7, 'gaps': [8], 'last_server_sequence': 16}
+  [PASS] Out-of-order gap (seq 6) closed once it arrived
+  [PASS] Sequence 9 was seen (not a gap) but still can't fold in past the gap at 8
+  [PASS] Permanent gap (seq 8, never sent) still reported — got [8]
+  [PASS] contiguous_up_to correctly stops right before the permanent gap — got 7
+
+----------------------------------------------------------------------------------------
+ASSERTIONS — derived state & safety signal honesty
+----------------------------------------------------------------------------------------
+  ledger status (pre-replay) = {
+  "patient_id": "d5c98bca-8fe2-4e13-bfc7-e92200a70f48",
+  "ledger_event_count": 21,
+  "reminders": [
+    {
+      "reminder_occurrence_key": "rem-morning-med:2026-10-21",
+      "delivery_state": "provider_accepted",
+      "user_acknowledged": true,
+      "user_acknowledged_at": "2026-10-21T18:30:31.715776",
+      "caregiver_escalated": true,
+      "caregiver_escalated_at": "2026-10-21T18:30:31.715776",
+      "sync_status": "synced"
+    }
+  ],
+  "routines": [
+    {
+      "routine_key": "breakfast",
+      "period": "morning",
+      "title_en": "Breakfast at 8:30 (patient prefers later)",
+      "scheduled_time": "08:30",
+      "active": true,
+      "conflict": true,
+      "conflict_reason": "concurrent edit: actor 8f236a51-b98b-4c40-9cac-b650b30c1e2f overwrote a change by bd0fbb9f-ecc9-40db-91eb-4181ac6e5de3 made 1s earlier \u2014 applied by server order, flagged for review"
+    }
+  ],
+  "consent": [
+    {
+      "category": "location",
+      "granted": true,
+      "version": 3
+    }
+  ],
+  "geofence": {
+    "status": "unknown",
+    "within_safe_zone": null,
+    "reason": "device reported 'unknown'"
+  }
+}
+  [PASS] Reminder delivery_state reached provider_accepted
+  [PASS] Reminder never auto-marked acknowledged by a notification alone (only by the explicit ack event)
+  [PASS] Reminder shows exactly one effective escalation (duplicate suppressed)
+  [PASS] Consent ends granted=True at version 3 (grant→revoke→stale-rejected→fresh-grant) — got {'category': 'location', 'granted': True, 'version': 3}
+  [PASS] Routine conflict flag set
+  [PASS] Routine shows the later (patient) edit by last-write-wins
+  [PASS] Missing telemetry reported as 'unknown', never inferred as safe — got {'status': 'unknown', 'within_safe_zone': None, 'reason': "device reported 'unknown'"}
+
+----------------------------------------------------------------------------------------
+ASSERTIONS — deterministic replay (the correctness proof)
+----------------------------------------------------------------------------------------
+  replay result = {'patient_id': 'd5c98bca-8fe2-4e13-bfc7-e92200a70f48', 'events_replayed': 21, 'outcomes': {'accepted': 15, 'rejected': 4, 'duplicate': 1, 'conflict_review': 1}, 'duration_ms': 19}
+  [PASS] Replay reproduces IDENTICAL derived state to incremental ingestion
+  [PASS] Replay processed every non-rejected ledger event
+
+----------------------------------------------------------------------------------------
+Exporting NDJSON audit bundle
+----------------------------------------------------------------------------------------
+  [PASS] Export endpoint returns 200
+  wrote evidence/ledger_audit_bundle.ndjson (21 lines, 14869 bytes)
+  [PASS] Every valid (non-dropped) submitted event appears in the export
+
+----------------------------------------------------------------------------------------
+ASSERTIONS — adaptive engine safe-fallback guard
+----------------------------------------------------------------------------------------
+  safe_decide(accuracy=NaN) -> difficulty=3 direction=maintained
+  [PASS] NaN accuracy falls back to unchanged difficulty, not a crash
+  safe_decide(accuracy=1.4 [invalid], rt=-500 [invalid]) -> difficulty=3 direction=maintained
+  [PASS] Out-of-range accuracy/response-time falls back to unchanged difficulty
+  safe_decide(current_difficulty=99 [out of range]) -> difficulty=1 direction=maintained
+  [PASS] Out-of-range current_difficulty input falls back to the minimum bound, not a crash
+  [PASS] adaptive_engine module has zero references to reminder/safety model names (structurally cannot touch them)
+
+========================================================================================
+RESULT: 31 passed, 0 failed
+========================================================================================
