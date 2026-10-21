@@ -1,9 +1,3 @@
-# Sukoon — AI-Powered Cognitive Assistance & Caregiver Support Platform
-
-**Smart India Hackathon 2026 · Problem Statement 26003**
-*AI-based Cognitive Gaming and Memory Assistance platform for elderly dementia patients in NER*
-Team: SevaTech
-
 > Sukoon is a cognitive support, memory-assistance and caregiver-monitoring platform. **It does not diagnose or treat dementia.** AI-generated insights are supportive, explainable, rule-based signals for caregivers and doctors — never a medical diagnosis. Clinical decisions should always be made by qualified healthcare professionals.
 
 ---
