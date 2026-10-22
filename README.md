@@ -32,13 +32,13 @@ Sukoon closes that loop: one connected platform, four coordinated views, built t
 |---|---|
 | Backend | Python, FastAPI, SQLAlchemy |
 | Database | SQLite by default; drop-in PostgreSQL for persistent deployments (one env var) |
-| Frontend | Vanilla HTML/CSS/JavaScript — no build step, no framework |
+| Frontend | Vanilla HTML/CSS/JavaScript |
 | Auth | JWT sessions, bcrypt password hashing, role- and ownership-scoped authorization on every route |
 | Charts | Chart.js, vendored locally — works offline |
 | Maps | Leaflet + OpenStreetMap tiles, Leaflet vendored locally |
 | Voice | Browser-native Web Speech API (STT + TTS) |
 | Video | Jitsi Meet (no-signup, deterministic room per appointment) |
-| AI | A fully explainable, rule-based adaptive-difficulty engine — deliberately not an opaque model |
+| AI | A fully explainable, rule-based adaptive-difficulty engine |
 
 ## Quick start
 
