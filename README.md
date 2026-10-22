@@ -19,7 +19,7 @@ Sukoon closes that loop: one connected platform, four coordinated views, built t
 - **Explainable adaptive difficulty** — a transparent, rule-based engine (not a black box) adjusts game difficulty and can justify every change in one plain sentence.
 - **Medication & routine reminders** with real server-side, time-based escalation — a missed reminder genuinely escalates to the caregiver, it isn't simulated.
 - **Geofencing & safety alerts** — a live map with a configurable safe zone, real alerting when a patient leaves it, uncertainty-aware status when telemetry is missing or stale.
-- **Offline Care Ledger & Safety Reconciliation Engine** — an append-only, versioned event ledger that makes the whole system resilient to offline use: deterministic conflict resolution, idempotent sync, a full audit trail, and a replay engine that can rebuild every derived record from the ledger alone. See [`OFFLINE_LEDGER_ARCHITECTURE.md`](./OFFLINE_LEDGER_ARCHITECTURE.md) for the full design.
+- **Offline Care Ledger & Safety Reconciliation Engine** — an append-only, versioned event ledger that makes the whole system resilient to offline use: deterministic conflict resolution, idempotent sync, a full audit trail, and a replay engine that can rebuild every derived record from the ledger alone.
 - **Family tree & call-for-comfort** — the patient sees photos and names of their family and can call anyone with one tap, which rings their phone's real dialer and notifies the family as a safety net.
 - **Virtual appointments** — every appointment gets a real, no-signup video room, joinable from the doctor and family dashboards.
 - **Bilingual, voice-enabled patient app** — English and Assamese, with text-to-speech and speech-to-text via the browser's native Web Speech API.
